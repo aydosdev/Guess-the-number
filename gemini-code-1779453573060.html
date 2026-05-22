@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="kaa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sandı Tap!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --panel: #12121a;
+      --border: #2a2a3e;
+      --accent: #f0e040;
+      --accent2: #40e0f0;
+      --danger: #f04060;
+      --success: #40f080;
+      --text: #e8e8f0;
+      --muted: #606080;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(240,224,64,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(240,224,64,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(40px); }
+    }
+
+    .container {
+      position: relative;
+      width: min(480px, 95vw);
+      z-index: 1;
+    }
+
+    .header { text-align: center; margin-bottom: 32px; }
+
+    .title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 12vw, 80px);
+      letter-spacing: 4px;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* Language switcher */
+    .lang-row {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .lang-btn {
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.15s;
+    }
+
+    .lang-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+    .lang-btn.active { border-color: var(--accent2); color: var(--accent2); background: rgba(64,224,240,0.08); }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 32px;
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .difficulty-row { display: flex; gap: 8px; margin-bottom: 28px; }
+
+    .diff-btn {
+      flex: 1;
+      padding: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.15s;
+    }
+
+    .diff-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .diff-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(240,224,64,0.08); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .stat {
+      text-align: center;
+      padding: 12px 8px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+    }
+
+    .stat-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 2px;
+      color: var(--accent2);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .range-info {
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+
+    .range-info span { color: var(--accent); font-size: 13px; }
+
+    .input-row { display: flex; gap: 10px; margin-bottom: 20px; }
+
+    .guess-input {
+      flex: 1;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      letter-spacing: 4px;
+      text-align: center;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color 0.15s;
+      -moz-appearance: textfield;
+    }
+
+    .guess-input::-webkit-inner-spin-button,
+    .guess-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    .guess-input:focus { border-color: var(--accent); }
+    .guess-input:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .guess-btn {
+      padding: 0 24px;
+      background: var(--accent);
+      border: none;
+      border-radius: 2px;
+      color: #0a0a0f;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .guess-btn:hover { background: #fff060; transform: translateY(-1px); }
+    .guess-btn:active { transform: translateY(0); }
+    .guess-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    .progress-wrap {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.3s ease, background 0.3s;
+      border-radius: 2px;
+    }
+
+    .message {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid transparent;
+      border-radius: 2px;
+      padding: 12px;
+      transition: all 0.2s;
+    }
+
+    .message.low { color: var(--accent2); border-color: rgba(64,224,240,0.2); background: rgba(64,224,240,0.05); }
+    .message.high { color: var(--danger); border-color: rgba(240,64,96,0.2); background: rgba(240,64,96,0.05); }
+    .message.win { color: var(--success); border-color: rgba(64,240,128,0.3); background: rgba(64,240,128,0.08); font-size: 14px; }
+    .message.lose { color: var(--danger); border-color: rgba(240,64,96,0.3); background: rgba(240,64,96,0.08); }
+    .message.hot { color: var(--accent); border-color: rgba(240,224,64,0.3); background: rgba(240,224,64,0.08); }
+
+    .history { margin-top: 20px; }
+
+    .history-label {
+      font-size: 9px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .history-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .chip {
+      padding: 4px 10px;
+      border-radius: 2px;
+      font-size: 11px;
+      letter-spacing: 1px;
+      border: 1px solid;
+      animation: chipIn 0.2s ease;
+    }
+
+    @keyframes chipIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .chip.low { color: var(--accent2); border-color: rgba(64,224,240,0.3); }
+    .chip.high { color: var(--danger); border-color: rgba(240,64,96,0.3); }
+
+    .new-game-btn {
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .new-game-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    .shake { animation: shake 0.4s ease; }
+
+    @keyframes winPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(64,240,128,0.4); }
+      50% { box-shadow: 0 0 20px 8px rgba(64,240,128,0.15); }
+    }
+
+    .win-glow { animation: winPulse 1.5s infinite; }
+
+    .record {
+      text-align: center;
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 16px;
+    }
+
+    .record span { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="title">SANDÍ TAP</div>
+    <div class="subtitle" id="subtitle">Sandı boljap kóríń</div>
+  </div>
+
+  <div class="lang-row">
+    <button class="lang-btn active" onclick="setLang('kaa')">QAR</button>
+    <button class="lang-btn" onclick="setLang('uz')">UZB</button>
+    <button class="lang-btn" onclick="setLang('ru')">RUS</button>
+    <button class="lang-btn" onclick="setLang('en')">ENG</button>
+  </div>
+
+  <div class="card" id="card">
+    <div class="difficulty-row">
+      <button class="diff-btn active" onclick="setDiff('oson')" id="diff-oson">—</button>
+      <button class="diff-btn" onclick="setDiff('orta')" id="diff-orta">—</button>
+      <button class="diff-btn" onclick="setDiff('qiyin')" id="diff-qiyin">—</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val" id="attempts-left">10</div>
+        <div class="stat-label" id="label-attempts">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="guesses-made">0</div>
+        <div class="stat-label" id="label-guesses">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="wins-count">0</div>
+        <div class="stat-label" id="label-wins">—</div>
+      </div>
+    </div>
+
+    <div class="range-info" id="range-info">
+      — <span id="range-text">1 — 100</span>
+    </div>
+
+    <div class="input-row">
+      <input type="number" class="guess-input" id="guess-input" placeholder="?" min="1" max="100">
+      <button class="guess-btn" id="guess-btn" onclick="makeGuess()">—</button>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progress-bar" style="width:100%"></div>
+    </div>
+
+    <div class="message" id="message">—</div>
+
+    <div class="history" id="history" style="display:none">
+      <div class="history-label" id="label-history">—</div>
+      <div class="history-chips" id="chips"></div>
+    </div>
+
+    <button class="new-game-btn" onclick="newGame()" id="new-game-btn">↺ —</button>
+
+    <div class="record" id="record-display"></div>
+  </div>
+</div>
+
+<script>
+  // =====================
+  // TARJIMALAR / ПЕРЕВОДЫ / TRANSLATIONS / АУДАРМАЛАР
+  // =====================
+  const T = {
+    kaa: {
+      subtitle: 'Sandı boljap kóríń',
+      diff: ['AŃSAT', 'ORTASHA', 'QÍYÍN'],
+      labelAttempts: 'Urınıslar',
+      labelGuesses: 'Boljawlar',
+      labelWins: 'Jeńisler',
+      rangePrefix: 'Diapazon:',
+      guessBtn: 'TABIW',
+      newGame: '↺ JAŃA OYÍN',
+      historyLabel: 'Boljawlar tariyxı',
+      startMsg: 'Sandı kiritiń hám boljap kóríń!',
+      invalidMsg: (max) => `1 hám ${max} arasındaǵı sandı kiritiń!`,
+      alreadyMsg: 'Bul sandı aldınnan boljadıńız!',
+      winMsg: (secret, count) => `🎉 DURÍS! San ${secret} edi. Onı ${count} urınısta taptıńız!`,
+      loseMsg: (secret) => `💀 UTILDÍŃÍZ! Men ${secret} sanın oylaǵandım.`,
+      hotUp: '🔥 JÚDÁ ÍSSÍ! Sál joqarıraq!',
+      hotDown: '🔥 JÚDÁ ÍSSÍ! Sál tómenirek!',
+      closeUp: '▲ Kóbirek! Júdá jaqın.',
+      closeDown: '▼ Azıraq! Júdá jaqın.',
+      upMsg: '▲ Kóbirek! Úlkenirek san kiritiń.',
+      downMsg: '▼ Azıraq! Kishirek san kiritiń.',
+      record: (n) => `REKORD: <span>${n} boljaw</span>`,
+    },
+    uz: {
+      subtitle: 'Sonni toping',
+      diff: ['OSON', 'OʻRTA', 'QIYIN'],
+      labelAttempts: 'Urinishlar',
+      labelGuesses: 'Taxminlar',
+      labelWins: 'Gʻalabalar',
+      rangePrefix: 'Oraliq:',
+      guessBtn: 'TOPISH',
+      newGame: '↺ YANGI OʻYIN',
+      historyLabel: 'Taxminlar tarixi',
+      startMsg: 'Son kiriting va taxmin qilib koʻring!',
+      invalidMsg: (max) => `1 va ${max} orasidagi sonni kiriting!`,
+      alreadyMsg: 'Bu sonni allaqachon taxmin qildingiz!',
+      winMsg: (secret, count) => `🎉 TOʻGʻRI! Son ${secret} edi. ${count} urinishda topdingiz!`,
+      loseMsg: (secret) => `💀 YUTQAZDINGIZ! Men ${secret} sonini oʻylagandim.`,
+      hotUp: '🔥 JUDA ISSIQ! Biroz yuqoriroq!',
+      hotDown: '🔥 JUDA ISSIQ! Biroz pastroq!',
+      closeUp: '▲ Koʻproq! Juda yaqin.',
+      closeDown: '▼ Kamroq! Juda yaqin.',
+      upMsg: '▲ Koʻproq! Kattaroq son kiriting.',
+      downMsg: '▼ Kamroq! Kichikroq son kiriting.',
+      record: (n) => `REKORD: <span>${n} ta taxmin</span>`,
+    },
+    ru: {
+      subtitle: 'Угадай число!',
+      diff: ['ЛЕГКО', 'СРЕДНЕ', 'СЛОЖНО'],
+      labelAttempts: 'Попытки',
+      labelGuesses: 'Догадки',
+      labelWins: 'Победы',
+      rangePrefix: 'Диапазон:',
+      guessBtn: 'УГАДАТЬ',
+      newGame: '↺ НОВАЯ ИГРА',
+      historyLabel: 'История угадываний',
+      startMsg: 'Введите число и попробуйте угадать!',
+      invalidMsg: (max) => `Введите число от 1 до ${max}!`,
+      alreadyMsg: 'Вы уже вводили это число!',
+      winMsg: (secret, count) => `🎉 ВЕРНО! Было загадано число ${secret}. Вы угадали за ${count} попыток!`,
+      loseMsg: (secret) => `💀 ВЫ ПРОИГРАЛИ! Я загадал число ${secret}.`,
+      hotUp: '🔥 ОЧЕНЬ ГОРЯЧО! Чуть больше!',
+      hotDown: '🔥 ОЧЕНЬ ГОРЯЧО! Чуть меньше!',
+      closeUp: '▲ Больше! Очень близко.',
+      closeDown: '▼ Меньше! Очень близко.',
+      upMsg: '▲ Больше! Введите число побольше.',
+      downMsg: '▼ Меньше! Введите число поменьше.',
+      record: (n) => `РЕКОРД: <span>${n} попыток</span>`,
+    },
+    en: {
+      subtitle: 'Guess the number!',
+      diff: ['EASY', 'MEDIUM', 'HARD'],
+      labelAttempts: 'Attempts',
+      labelGuesses: 'Guesses',
+      labelWins: 'Wins',
+      rangePrefix: 'Range:',
+      guessBtn: 'GUESS',
+      newGame: '↺ NEW GAME',
+      historyLabel: 'Guess history',
+      startMsg: 'Enter a number and try to guess!',
+      invalidMsg: (max) => `Enter a number between 1 and ${max}!`,
+      alreadyMsg: 'You already guessed that number!',
+      winMsg: (secret, count) => `🎉 CORRECT! The number was ${secret}. You guessed it in ${count} tries!`,
+      loseMsg: (secret) => `💀 GAME OVER! The number was ${secret}.`,
+      hotUp: '🔥 VERY HOT! A little higher!',
+      hotDown: '🔥 VERY HOT! A little lower!',
+      closeUp: '▲ Higher! Very close.',
+      closeDown: '▼ Lower! Very close.',
+      upMsg: '▲ Higher! Enter a bigger number.',
+      downMsg: '▼ Lower! Enter a smaller number.',
+      record: (n) => `RECORD: <span>${n} guesses</span>`,
+    }
+  };
+
+  const DIFFS = {
+    oson: { max: 100, attempts: 10 },
+    orta: { max: 200, attempts: 8 },
+    qiyin: { max: 500, attempts: 7 }
+  };
+
+  let secret, maxAttempts, maxNum, attemptsLeft, gameOver, guesses, wins, bestScore;
+  let currentDiff = 'oson';
+  let currentLang = 'kaa';
+
+  wins = 0;
+  bestScore = null;
+
+  function t() { return T[currentLang]; }
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+    applyLang();
+  }
+
+  function applyLang() {
+    const tr = t();
+    document.getElementById('subtitle').textContent = tr.subtitle;
+
+    const diffs = ['oson', 'orta', 'qiyin'];
+    diffs.forEach((d, i) => {
+      document.getElementById('diff-' + d).textContent = tr.diff[i];
+    });
+
+    document.getElementById('label-attempts').textContent = tr.labelAttempts;
+    document.getElementById('label-guesses').textContent = tr.labelGuesses;
+    document.getElementById('label-wins').textContent = tr.labelWins;
+    document.getElementById('range-info').innerHTML = tr.rangePrefix + ' <span id="range-text">1 — ' + maxNum + '</span>';
+    document.getElementById('guess-btn').textContent = tr.guessBtn;
+    document.getElementById('new-game-btn').textContent = tr.newGame;
+
+    const history = document.getElementById('history');
+    if (history.style.display !== 'none') {
+      document.getElementById('label-history').textContent = tr.historyLabel;
+    } else {
+      document.getElementById('label-history').textContent = tr.historyLabel;
+    }
+
+    if (!gameOver && guesses && guesses.length === 0) {
+      setMessage(tr.startMsg, '');
+    }
+
+    updateRecord();
+  }
+
+  function setDiff(d) {
+    currentDiff = d;
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('diff-' + d).classList.add('active');
+    newGame();
+  }
+
+  function newGame() {
+    const cfg = DIFFS[currentDiff];
+    maxNum = cfg.max;
+    maxAttempts = cfg.attempts;
+    attemptsLeft = maxAttempts;
+    gameOver = false;
+    guesses = [];
+    secret = Math.floor(Math.random() * maxNum) + 1;
+
+    document.getElementById('range-info').innerHTML = t().rangePrefix + ' <span id="range-text">1 — ' + maxNum + '</span>';
+    document.getElementById('attempts-left').textContent = attemptsLeft;
+    document.getElementById('guesses-made').textContent = 0;
+    document.getElementById('wins-count').textContent = wins;
+
+    const input = document.getElementById('guess-input');
+    input.max = maxNum;
+    input.disabled = false;
+    input.value = '';
+    input.placeholder = '?';
+
+    document.getElementById('guess-btn').disabled = false;
+    document.getElementById('progress-bar').style.width = '100%';
+    document.getElementById('progress-bar').style.background = 'linear-gradient(90deg, var(--accent), var(--accent2))';
+
+    setMessage(t().startMsg, '');
+    document.getElementById('history').style.display = 'none';
+    document.getElementById('chips').innerHTML = '';
+    document.getElementById('card').classList.remove('win-glow');
+
+    updateRecord();
+  }
+
+  function makeGuess() {
+    if (gameOver) return;
+    const input = document.getElementById('guess-input');
+    const val = parseInt(input.value);
+
+    if (!val || val < 1 || val > maxNum) {
+      input.classList.add('shake');
+      setTimeout(() => input.classList.remove('shake'), 400);
+      setMessage(t().invalidMsg(maxNum), 'high');
+      return;
+    }
+
+    if (guesses.includes(val)) {
+      input.classList.add('shake');
+      setTimeout(() => input.classList.remove('shake'), 400);
+      setMessage(t().alreadyMsg, '');
+      return;
+    }
+
+    attemptsLeft--;
+    guesses.push(val);
+
+    document.getElementById('guesses-made').textContent = guesses.length;
+    document.getElementById('attempts-left').textContent = attemptsLeft;
+
+    const pct = (attemptsLeft / maxAttempts) * 100;
+    const bar = document.getElementById('progress-bar');
+    bar.style.width = pct + '%';
+    if (pct < 30) bar.style.background = 'var(--danger)';
+    else if (pct < 60) bar.style.background = 'linear-gradient(90deg, var(--accent), orange)';
+    else bar.style.background = 'linear-gradient(90deg, var(--accent), var(--accent2))';
+
+    addChip(val);
+    input.value = '';
+
+    if (val === secret) {
+      wins++;
+      document.getElementById('wins-count').textContent = wins;
+      if (!bestScore || guesses.length < bestScore) bestScore = guesses.length;
+      setMessage(t().winMsg(secret, guesses.length), 'win');
+      document.getElementById('guess-btn').disabled = true;
+      input.disabled = true;
+      document.getElementById('card').classList.add('win-glow');
+      gameOver = true;
+      updateRecord();
+      return;
+    }
+
+    if (attemptsLeft === 0) {
+      setMessage(t().loseMsg(secret), 'lose');
+      document.getElementById('guess-btn').disabled = true;
+      input.disabled = true;
+      gameOver = true;
+      return;
+    }
+
+    const diff = Math.abs(val - secret);
+    const pctRange = diff / maxNum;
+
+    if (val < secret) {
+      if (pctRange < 0.05) setMessage(t().hotUp, 'hot');
+      else if (pctRange < 0.15) setMessage(t().closeUp, 'low');
+      else setMessage(t().upMsg, 'low');
+    } else {
+      if (pctRange < 0.05) setMessage(t().hotDown, 'hot');
+      else if (pctRange < 0.15) setMessage(t().closeDown, 'high');
+      else setMessage(t().downMsg, 'high');
+    }
+  }
+
+  function addChip(val) {
+    const chips = document.getElementById('chips');
+    const chip = document.createElement('div');
+    chip.className = 'chip ' + (val < secret ? 'low' : val > secret ? 'high' : 'win');
+    chip.textContent = val + (val < secret ? ' ↑' : val > secret ? ' ↓' : ' ✓');
+    chips.appendChild(chip);
+    document.getElementById('history').style.display = 'block';
+  }
+
+  function setMessage(text, type) {
+    const el = document.getElementById('message');
+    el.textContent = text;
+    el.className = 'message ' + type;
+  }
+
+  function updateRecord() {
+    const el = document.getElementById('record-display');
+    if (bestScore) {
+      el.innerHTML = t().record(bestScore);
+    } else {
+      el.innerHTML = '';
+    }
+  }
+
+  document.getElementById('guess-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') makeGuess();
+  });
+
+  applyLang();
+  newGame();
+</script>
+</body>
+</html>
